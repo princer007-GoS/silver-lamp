@@ -4,7 +4,7 @@
 		return myHero:GetSpellData(spell).currentCd == 0 and myHero:GetSpellData(spell).level > 0 and myHero:GetSpellData(spell).mana <= myHero.mana and Game.CanUseSpell(spell) == 0
 	end
 	
-	function L:LoadDependency(name)
+	function L:CheckAndDownloadDependency(name)
 		local file = COMMON_PATH .. name .. ".lua"
 		if not FileExist(file) then
 			print(name .. " installed")

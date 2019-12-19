@@ -64,19 +64,8 @@ function OnTick()
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS] then
 		Harass(target)
 	end
-	--[[
-	if orbMode == 'Clear' then
-		--LaneClear()
-	end
-
-	if orbMode == 'Lasthit' then
-		--LastHit()
-	end
 	
-	if orbMode == 'Flee' then
-		--Flee()
-	end
-	]]
+	print(CountEnemyHeroInRange(425))
 end
 
 function Combo(target)
@@ -166,7 +155,7 @@ end
 function CountEnemyHeroInRange(range)
 local enemyInRange = 0
         for i, hero in pairs(GetHeroes()) do
-            if hero.isEnemy and hero.pos:DistanceTo(myHero.pos) <= range then
+            if hero.isEnemy and not hero.dead and hero.pos:DistanceTo(myHero.pos) <= range then
                 enemyInRange = enemyInRange + 1
             end
         end
@@ -179,8 +168,4 @@ end
 
 function IsSecondQ()
 	return myHero:GetSpellData(_Q).name == "ThreshQLeap"
-end
-
-function OnProcessSpell(unit, spell)
-print(spell.name)
 end

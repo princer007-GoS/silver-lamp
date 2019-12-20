@@ -14,11 +14,13 @@ local bundleDir = "L_Bundle/"
 local bundlePath = COMMON_PATH .. bundleDir
 
 local downloadOccured, scriptsLoaded = false
-local scriptFile = L_SupportedChamps[myHero.charName]
+local scriptFile
 
 function OnLoad()
 	DownloadCommon(_Versions)
 	LoadSubmodule(_Versions)
+	
+	scriptFile = L_SupportedChamps[myHero.charName]
 	
 	if (scriptFile == nil) then return end
 
@@ -64,7 +66,7 @@ function LoadChampionSubmodule()
 	LoadSubmodule(scriptFile)
 	L_Script:Init()
 	
-	if CheckUpdates(scriptFile, version)
+	CheckUpdates(scriptFile, version)
 
 	scriptsLoaded = true
 end

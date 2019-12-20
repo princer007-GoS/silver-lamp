@@ -7,5 +7,5 @@ L_Versions =
 
 L_SupportedChamps = 
 {
-	["Thresh"] = ["L_Thresh"]
+	["Thresh"] = "L_Thresh"
 }

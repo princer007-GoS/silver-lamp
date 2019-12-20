@@ -92,12 +92,7 @@ function CastQ(target, predChance)
 			_G.SDK.Orbwalker:SetAttack(false)
 			Control.CastSpell(HK_Q, pred.CastPosition)
 			
-            DelayAction(function()
-                if castSpell.state == 1 then
-                    Control.SetCursorPos(castSpell.mouse)
-                    castSpell.state = 0
-                end
-            end,Game.Latency()/1000)
+            DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
 			
 		end
 	end 

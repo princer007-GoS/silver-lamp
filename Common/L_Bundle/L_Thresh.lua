@@ -14,12 +14,7 @@ require('GamsteronPrediction')
 
 local QData, EData, LastQTime
 
-function OnLoad()
-	QData = {Type = _G.SPELLTYPE_LINE, Delay = 0.5, Radius = 80, Range = 1000, Speed = 1900, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_YASUOWALL}, UseBoundingRadius = true }
-	EData = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 150, Range = 450, Speed = 1100, Collision = false}
-	
-	LoadMenu()
-end
+--Init
 
 function LoadMenu()
     MM = MenuElement({type = MENU, id = "mm", name = "[L] Thresh"})
@@ -46,6 +41,13 @@ function LoadMenu()
 	L_Core:AddMenuInfo(ScriptInfo, MM)
 end
 
+do
+	QData = {Type = _G.SPELLTYPE_LINE, Delay = 0.5, Radius = 80, Range = 1000, Speed = 1900, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_YASUOWALL}, UseBoundingRadius = true }
+	EData = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 150, Range = 450, Speed = 1100, Collision = false}
+	
+	LoadMenu()
+end
+
 function OnDraw()
     if myHero.dead then return end
 
@@ -57,7 +59,7 @@ end
 function OnTick()
     local target = _G.SDK.TargetSelector:GetTarget(QData.Range)
 	
-	if not _G.SDK.Orbwalker.AttackEnabled and Game.Timer() - LastQTime > 2.5 then _G.SDK.Orbwalker:SetAttack(true) end
+	--if not _G.SDK.Orbwalker.AttackEnabled and Game.Timer() - LastQTime > 2.5 then _G.SDK.Orbwalker:SetAttack(true) end
 	
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then
 		Combo(target)
@@ -89,7 +91,14 @@ function CastQ(target, predChance)
 		if pred.Hitchance >= predChance then
 			_G.SDK.Orbwalker:SetAttack(false)
 			Control.CastSpell(HK_Q, pred.CastPosition)
-			LastQTime = Game.Timer()
+			
+            DelayAction(function()
+                if castSpell.state == 1 then
+                    Control.SetCursorPos(castSpell.mouse)
+                    castSpell.state = 0
+                end
+            end,Game.Latency()/1000)
+			
 		end
 	end 
 	

@@ -1,10 +1,15 @@
-local Version = 0.01
-local Patch = 9.24
+local ScriptInfo = 
+{
+	Version = 0.01,
+	Patch = 9.24,
+	Release = "dAlpha",
+}
 
 if (myHero.charName ~= "Thresh") then 
     return
 end
 
+require('L_Core')
 require('GamsteronPrediction')
 
 local QData, EData, LastQTime
@@ -37,11 +42,8 @@ function LoadMenu()
     MM:MenuElement({type = MENU, id = "Harass", name = "Harass"})
     MM.Harass:MenuElement({id = "UseQ", name = "Use Q", value = true})
     MM.Harass:MenuElement({id = "QPredChance", name = "Hitchance", value = 2, drop = {"Normal", "High", "Immobile"}})
-
-    MM:MenuElement({type = SPACE})
-    MM:MenuElement({name ="Patch : " , drop = {Patch}})
-    MM:MenuElement({name ="Version " , drop = {Version}})
-
+	
+	L_Core:AddMenuInfo(ScriptInfo, MM)
 end
 
 function OnDraw()
@@ -64,8 +66,6 @@ function OnTick()
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_HARASS] then
 		Harass(target)
 	end
-	
-	print(CountEnemyHeroInRange(425))
 end
 
 function Combo(target)
@@ -113,54 +113,18 @@ function CastE()
 	local castDistance = -450
 	if(MM.Combo.EMode:Value() == 2) then castDistance = 450 end
 	
-	Control.CastSpell(HK_E, Extended(myHero.pos, Normalized(target.pos, myHero.pos), castDistance))
+	Control.CastSpell(HK_E, L_Core:Extended(myHero.pos, L_Core:Normalized(target.pos, myHero.pos), castDistance))
 end
 
 function CastR()
 	if Game.CanUseSpell(_R) ~= READY then return end
-	if CountEnemyHeroInRange(450 - 35) >= MM.Combo.EnemiesToCastR:Value() then
+	if L_Core:CountHeroesInRange(450 - 35, true) >= MM.Combo.EnemiesToCastR:Value() then
 		Control.CastSpell(HK_R)
 	end
 end
 
 --MISC, MOVE TO THE CORE
  
-function Normalized(p1, p2)
-    local dx = p1.x - p2.x
-    local dz = p1.z - p2.z
-    local length = math.sqrt(dx * dx + dz * dz)
-    local sol = nil
-    if (length > 0) then
-        local inv = 1.0 / length
-        sol = {x = (dx * inv), z = (dz * inv)}
-    end
-    return sol
-end
- 
-function Extended(vec, dir, range)
-    if (dir == nil) then
-        return vec
-    end
-    return {x = vec.x + dir.x * range, z = vec.z + dir.z * range}
-end
-
-function GetHeroes()
-    local Heroes = {}
-    for i = 1, Game.HeroCount() do
-        table.insert(Heroes, Game.Hero(i))
-    end
-    return Heroes
-end
-
-function CountEnemyHeroInRange(range)
-local enemyInRange = 0
-        for i, hero in pairs(GetHeroes()) do
-            if hero.isEnemy and not hero.dead and hero.pos:DistanceTo(myHero.pos) <= range then
-                enemyInRange = enemyInRange + 1
-            end
-        end
-return enemyInRange
-end
 
 function GetPredSetting(menu)
 	return menu.QPredChance:Value()+1

@@ -1,38 +1,37 @@
 local ScriptInfo = 
 {
-	Version = 0.30,
+	Version = 0.31,
 	Patch = 9.24,
 	Release = "Beta",
 }
 
-local supportedChamps = 
-{
-	["Thresh"] = "L_Thresh",
-	[""] = ""
-}
-if (supportedChamps[myHero.charName] == nil) then
-    return
-end
-
 local _Versions = 'L_Versions'
 local _Core = 'L_Core'
 local _Oader = 'L_Oader'
+local _Prediction = 'GamsteronPrediction'
 
 local bundleDir = "L_Bundle/"
 local bundlePath = COMMON_PATH .. bundleDir
 
 local downloadOccured, scriptsLoaded = false
+local scriptFile = L_SupportedChamps[myHero.charName]
 
 function OnLoad()
 	DownloadCommon(_Versions)
 	LoadSubmodule(_Versions)
 	
+	if (scriptFile == nil) then return end
+
 	if CheckForLoaderUpdates() then return end
 	
 	CheckAndDownloadDependency(_Core)
-	CheckAndDownloadDependency(supportedChamps[myHero.charName])
+	CheckAndDownloadDependency(_Prediction)
+	CheckAndDownloadDependency(scriptFile)
 	
 	LoadSubmodule(_Core)
+	
+	CheckUpdates(_Core, L_Core.Version)
+	
 	function L_Core:LoadSubmodule(name) LoadSubmodule(name) end
 	
 	LoadMenu()
@@ -62,7 +61,10 @@ end
 function LoadChampionSubmodule()
 	if scriptsLoaded then print("L Submodules are already loaded") return end
 	
-	LoadSubmodule(supportedChamps[myHero.charName])
+	LoadSubmodule(scriptFile)
+	L_Script:Init()
+	
+	if CheckUpdates(scriptFile, version)
 
 	scriptsLoaded = true
 end
@@ -73,8 +75,10 @@ end
 
 --Updates
 
-function CheckUpdates(name)
-	
+function CheckUpdates(name, version)
+	if L_Versions[name] == nil or L_Versions[name] == version then return end
+	DownloadCommon(name)
+	downloadOccured = true
 end
 
 function CheckAndDownloadDependency(name)
@@ -82,10 +86,7 @@ function CheckAndDownloadDependency(name)
 	if not FileExist(file) then
 		DownloadCommon(name, file)
 		print(name .. " installed")
-		return false
 	end
-	--if 
-	return false
 end
 
 function DownloadCommon(name, path)

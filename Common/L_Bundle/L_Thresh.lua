@@ -1,6 +1,8 @@
+class 'L_Script'
+
 local ScriptInfo = 
 {
-	Version = 0.01,
+	Version = 0.02,
 	Patch = 9.24,
 	Release = "dAlpha",
 }
@@ -9,6 +11,7 @@ if (myHero.charName ~= "Thresh") then
     return
 end
 
+local inited = false
 local QData, EData, LastQTime
 
 --Init
@@ -38,7 +41,7 @@ function LoadMenu()
 	L_Core:AddMenuInfo(ScriptInfo, MM)
 end
 
-do
+function L_Script:Init()
 	QData = {Type = _G.SPELLTYPE_LINE, Delay = 0.5, Radius = 80, Range = 1000, Speed = 1900, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_YASUOWALL}, UseBoundingRadius = true }
 	EData = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 150, Range = 450, Speed = 1100, Collision = false}
 	
@@ -46,7 +49,7 @@ do
 end
 
 function OnDraw()
-    if myHero.dead then return end
+    if myHero.dead or not inited then return end
 
 	Draw.Circle(myHero.pos, QData.Range, 0, Draw.Color(200, 255, 255, 255))
 end
@@ -54,6 +57,8 @@ end
 --TRASH
 
 function OnTick()
+    if myHero.dead or not inited then return end
+	
     local target = _G.SDK.TargetSelector:GetTarget(QData.Range)
 	
 	--if not _G.SDK.Orbwalker.AttackEnabled and Game.Timer() - LastQTime > 2.5 then _G.SDK.Orbwalker:SetAttack(true) end
@@ -90,7 +95,6 @@ function CastQ(target, predChance)
 			Control.CastSpell(HK_Q, pred.CastPosition)
 			
             DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
-			
 		end
 	end 
 	

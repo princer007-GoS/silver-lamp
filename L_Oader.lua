@@ -32,7 +32,7 @@ function OnLoad()
 	
 	LoadSubmodule(_Core)
 	
-	CheckUpdates(_Core, L_Core.Version)
+	CheckUpdates(_Core, L_Core:VersionCheck())
 	
 	function L_Core:LoadSubmodule(name) LoadSubmodule(name) end
 	
@@ -66,7 +66,7 @@ function LoadChampionSubmodule()
 	LoadSubmodule(scriptFile)
 	L_Script:Init()
 	
-	CheckUpdates(scriptFile, version)
+	CheckUpdates(scriptFile, L_Script:VersionCheck())
 
 	scriptsLoaded = true
 end

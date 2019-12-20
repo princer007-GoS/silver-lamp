@@ -1,7 +1,17 @@
 ﻿class 'L_Core'
 
+local ScriptInfo = 
+{
+	Version = 0.02,
+	Patch = 9.24,
+	Release = "dAlpha",
+}
+
 DebugMode = false
-Version = 0.02
+
+function L_Core:VersionCheck()
+	return ScriptInfo.Version
+end
 
 function L_Core:CanCast(spell)
 	return myHero:GetSpellData(spell).currentCd == 0 and myHero:GetSpellData(spell).level > 0 and myHero:GetSpellData(spell).mana <= myHero.mana and Game.CanUseSpell(spell) == 0

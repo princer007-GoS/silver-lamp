@@ -48,6 +48,10 @@ function L_Script:Init()
 	LoadMenu()
 end
 
+function L_Script:VersionCheck()
+	return ScriptInfo.Version
+end
+
 function OnDraw()
     if myHero.dead or not inited then return end
 

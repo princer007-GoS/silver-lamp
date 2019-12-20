@@ -9,9 +9,6 @@ if (myHero.charName ~= "Thresh") then
     return
 end
 
-require('L_Core')
-require('GamsteronPrediction')
-
 local QData, EData, LastQTime
 
 --Init
@@ -137,3 +134,5 @@ end
 function IsSecondQ()
 	return myHero:GetSpellData(_Q).name == "ThreshQLeap"
 end
+
+require('GamsteronPrediction')

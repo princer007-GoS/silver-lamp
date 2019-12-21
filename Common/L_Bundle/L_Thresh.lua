@@ -2,7 +2,7 @@ class 'L_Script'
 
 local ScriptInfo = 
 {
-	Version = 0.02,
+	Version = 0.03,
 	Patch = 9.24,
 	Release = "dAlpha",
 }
@@ -12,7 +12,7 @@ if (myHero.charName ~= "Thresh") then
 end
 
 local inited = false
-local QData, EData, LastQTime
+local QData, EData
 
 --Init
 
@@ -46,6 +46,9 @@ function L_Script:Init()
 	EData = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 150, Range = 450, Speed = 1100, Collision = false}
 	
 	LoadMenu()
+
+	L_Core:LoadSubmodule('GamsteronPrediction')
+	inited = true
 end
 
 function L_Script:VersionCheck()
@@ -65,8 +68,6 @@ function OnTick()
 	
     local target = _G.SDK.TargetSelector:GetTarget(QData.Range)
 	
-	--if not _G.SDK.Orbwalker.AttackEnabled and Game.Timer() - LastQTime > 2.5 then _G.SDK.Orbwalker:SetAttack(true) end
-	
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then
 		Combo(target)
 	end
@@ -78,10 +79,10 @@ end
 
 function Combo(target)
 	--if(MM.Combo.Mode:Value() == 1) then end
-	if(MM.Combo.UseQ:Value()) then CastQ(target, GetPredSetting(MM.Combo)) end
+	if(MM.Combo.UseR:Value()) then CastR() end
 	--if(MM.Combo.UseW:Value()) then CastW() end
 	if(MM.Combo.UseE:Value()) then CastE() end
-	if(MM.Combo.UseR:Value()) then CastR() end
+	if(MM.Combo.UseQ:Value()) then CastQ(target, GetPredSetting(MM.Combo)) end
 end
 
 function Harass(target)
@@ -92,22 +93,34 @@ end
 
 function CastQ(target, predChance)
 	if Game.CanUseSpell(_Q) ~= READY then return end
-	if not IsSecondQ() then
-		local pred = GetGamsteronPrediction(target, QData, myHero)
-		if pred.Hitchance >= predChance then
-			_G.SDK.Orbwalker:SetAttack(false)
-			Control.CastSpell(HK_Q, pred.CastPosition)
-			
-            DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
-		end
+	local isSecondQActive = IsSecondQ()
+	
+	if not isSecondQActive then
+		FirstQCast(target, predChance)
 	end 
 	
-	if IsSecondQ() and myHero:GetSpellData(_E).currentCd <= 0.4 and myHero:GetSpellData(_E).level > 0 then
-		_G.SDK.Orbwalker:SetAttack(true)
-		Control.CastSpell(HK_Q)
-		CastW(true)
+	if isSecondQActive and 
+			myHero:GetSpellData(_E).currentCd <= 0.4 and 
+			myHero:GetSpellData(_E).level > 0 then
+		SecondQCast()
 	end
 end
+
+function FirstQCast(target, predChance)
+	local pred = GetGamsteronPrediction(target, QData, myHero)
+	if pred.Hitchance >= predChance then
+		_G.SDK.Orbwalker:SetAttack(false)
+		Control.CastSpell(HK_Q, pred.CastPosition)
+        DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
+	end
+end
+
+function SecondQCast()
+	_G.SDK.Orbwalker:SetAttack(true)
+	Control.CastSpell(HK_Q)
+	CastW(true)
+end
+
 
 function CastW(force)
 	if Game.CanUseSpell(_W) ~= READY then return end
@@ -132,8 +145,7 @@ function CastR()
 	end
 end
 
---MISC, MOVE TO THE CORE
- 
+--Misc
 
 function GetPredSetting(menu)
 	return menu.QPredChance:Value()+1
@@ -142,5 +154,3 @@ end
 function IsSecondQ()
 	return myHero:GetSpellData(_Q).name == "ThreshQLeap"
 end
-
-require('GamsteronPrediction')

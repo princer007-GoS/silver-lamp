@@ -1,8 +1,8 @@
 local ScriptInfo = 
 {
-	Version = 0.31,
+	Version = 0.9,
 	Patch = 9.24,
-	Release = "Beta",
+	Release = "Pre-Release",
 }
 
 local _Versions = 'L_Versions'
@@ -17,6 +17,7 @@ local downloadOccured, scriptsLoaded = false
 local scriptFile
 
 function OnLoad()
+	--Loading versions
 	DownloadCommon(_Versions)
 	LoadSubmodule(_Versions)
 	
@@ -24,8 +25,10 @@ function OnLoad()
 	
 	if (scriptFile == nil) then return end
 
+	--Checking Loader updates
 	if CheckForLoaderUpdates() then return end
 	
+	--Downloading dependencies
 	CheckAndDownloadDependency(_Core)
 	CheckAndDownloadDependency(_Prediction)
 	CheckAndDownloadDependency(scriptFile)
@@ -38,7 +41,10 @@ function OnLoad()
 	
 	LoadMenu()
 	
-	if LM.autoInject then LoadChampionSubmodule() end
+	--Autoinject
+	if LM.autoInject:Value() then
+		LoadChampionSubmodule()
+	end
 end
 
 function OnDraw()
@@ -64,10 +70,11 @@ function LoadChampionSubmodule()
 	if scriptsLoaded then print("L Submodules are already loaded") return end
 	
 	LoadSubmodule(scriptFile)
-	L_Script:Init()
+	if CheckUpdates(scriptFile, L_Script:VersionCheck()) 
+	then 
+		L_Script:Init() --if updated not needed, we load the script
+	end
 	
-	CheckUpdates(scriptFile, L_Script:VersionCheck())
-
 	scriptsLoaded = true
 end
 
@@ -78,7 +85,7 @@ end
 --Updates
 
 function CheckUpdates(name, version)
-	if L_Versions[name] == nil or L_Versions[name] == version then return end
+	if L_Versions[name] == nil or L_Versions[name] == version then return true end
 	DownloadCommon(name)
 	downloadOccured = true
 end

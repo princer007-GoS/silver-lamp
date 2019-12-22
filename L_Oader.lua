@@ -1,8 +1,8 @@
 local ScriptInfo = 
 {
-	Version = 0.9,
+	Version = 1.01,
 	Patch = 9.24,
-	Release = "Pre-Release",
+	Release = "Release",
 }
 
 local _Versions = 'L_Versions'
@@ -85,7 +85,7 @@ end
 --Updates
 
 function CheckUpdates(name, version)
-	if L_Versions[name] == nil or L_Versions[name] == version then return true end
+	if L_Versions[name] == nil or L_Versions[name] <= version then return true end
 	DownloadCommon(name)
 	downloadOccured = true
 end
@@ -105,7 +105,7 @@ function DownloadCommon(name, path)
 end
 
 function CheckForLoaderUpdates()
-		if L_Versions[_Oader] == ScriptInfo.Version then return false end
+		if L_Versions[_Oader] <= ScriptInfo.Version then return false end
 		
 		DownloadFileAsync("https://raw.githubusercontent.com/princer007-GoS/silver-lamp/master/" .. _Oader .. ".lua", _Oader .. ".lua", function() downloadOccured = true end)
 		while not FileExist(path) do end

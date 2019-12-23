@@ -2,7 +2,7 @@ local ScriptInfo =
 {
 	Version = 1.01,
 	Patch = 9.24,
-	Release = "Release",
+	Release = "Stable",
 }
 
 local _Versions = 'L_Versions'

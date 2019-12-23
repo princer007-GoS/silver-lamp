@@ -1,6 +1,6 @@
 local ScriptInfo = 
 {
-	Version = 1.01,
+	Version = 1.02,
 	Patch = 9.24,
 	Release = "Stable",
 }

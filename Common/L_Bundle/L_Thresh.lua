@@ -2,7 +2,7 @@ class 'L_Script'
 
 local ScriptInfo = 
 {
-	Version = 0.7,
+	Version = 0.71,
 	Patch = 9.24,
 	Release = "dBeta",
 }
@@ -93,7 +93,6 @@ function Combo()
 end
 
 function Harass()
-
 	if IsSecondQ() or not MM.Harass.UseQ:Value() then return end
 	
 	if MM.Harass.QMode:Value() == 1 then
@@ -107,12 +106,12 @@ end
 
 --CAST
 function CastAnyQ()
+	if Game.CanUseSpell(_Q) ~= READY then return end
 	local enemies = L_Core:GetHeroesInRange(QData.Range, L_Core.Team.Enemy, true, L_Core.OrderMode.CurrentHP, true)
 	
     for _, enemy in pairs(enemies) do
 		local pred = GetGamsteronPrediction(enemy, QData, myHero)
 		if pred.Hitchance >= HITCHANCE_HIGH then
-		print()
 			InitiateQCast(pred.CastPosition)
 			return
 		end

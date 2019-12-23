@@ -64,7 +64,7 @@ function L_Core:GetHeroes(team, aliveOnly, orderMode, ignoreSelf)
 	if aliveOnly == nil then aliveOnly = false end
 	if orderMode == nil then orderMode = L_Core.OrderMode.None end
 	if ignoreSelf == nil then ignoreSelf = false end
-aliveOnly = true
+	
     local heroes = {}
     for i = 1, Game.HeroCount() do
 		local hero = Game.Hero(i)

@@ -1,6 +1,6 @@
 local ScriptInfo = 
 {
-	Version = 1.02,
+	Version = 1.03,
 	Patch = 9.24,
 	Release = "Stable",
 }
@@ -13,10 +13,15 @@ local _Prediction = 'GamsteronPrediction'
 local bundleDir = "L_Bundle\\"
 local bundlePath = COMMON_PATH .. bundleDir
 
-local downloadOccured, scriptsLoaded = false
+local downloadOccured, scriptsLoaded, failedToLoad
 local scriptFile
 
 function OnLoad()
+	if not FolderExists(bundlePath) then
+		failedToLoad = true
+		return
+	end
+
 	--Loading versions
 	DownloadCommon(_Versions)
 	LoadSubmodule(_Versions)
@@ -49,6 +54,8 @@ end
 
 function OnDraw()
 	if downloadOccured then Draw.Text("[L] Oader downloaded updates. Please, press F6 twice to reload", 18, 450, 550) end
+	if failedToLoad then Draw.Text("[L] Oader failed to load. L_Bundle directory doesn't exist", 18, 450, 550) end
+	if failedToLoad then Draw.Text("Please, check the script topic for resolving this issue", 18, 450, 570) end
 end
 
 function LoadMenu()
@@ -62,6 +69,20 @@ function LoadMenu()
     LM.Debug:MenuElement({name = "Print debug data", value = false, toggle = true, callback = function(value) L_Core.DebugMode = value end})
 
 	L_Core:AddMenuInfo(ScriptInfo, LM)
+end
+
+function FolderExists(strFolderName)
+	local fileHandle, strError = io.open(strFolderName.."\\*.*","r")
+	if fileHandle ~= nil then
+		io.close(fileHandle)
+		return true
+	else
+		if string.match(strError,"No such file or directory") then
+			return false
+		else
+			return true
+		end
+	end
 end
 
 --Loader

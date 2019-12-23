@@ -10,7 +10,7 @@ local _Core = 'L_Core'
 local _Oader = 'L_Oader'
 local _Prediction = 'GamsteronPrediction'
 
-local bundleDir = "L_Bundle/"
+local bundleDir = "L_Bundle\\"
 local bundlePath = COMMON_PATH .. bundleDir
 
 local downloadOccured, scriptsLoaded = false
@@ -87,6 +87,7 @@ end
 function CheckUpdates(name, version)
 	if L_Versions[name] == nil or L_Versions[name] <= version then return true end
 	DownloadCommon(name)
+		print(name .. " updated. No reload needed")
 	downloadOccured = true
 end
 

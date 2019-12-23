@@ -2,7 +2,7 @@
 
 local ScriptInfo = 
 {
-	Version = 0.1,
+	Version = 0.2,
 	Patch = 9.24,
 	Release = "dAlpha",
 }
@@ -64,21 +64,33 @@ function L_Core:GetHeroes(team, aliveOnly, orderMode, ignoreSelf)
 	if aliveOnly == nil then aliveOnly = false end
 	if orderMode == nil then orderMode = L_Core.OrderMode.None end
 	if ignoreSelf == nil then ignoreSelf = false end
-
+aliveOnly = true
     local heroes = {}
     for i = 1, Game.HeroCount() do
 		local hero = Game.Hero(i)
-		if team == L_Core.Team.Any 
-				or (team == L_Core.Team.Enemy and hero.isEnemy)
-				or (team == L_Core.Team.Ally and hero.isAlly)
-				and (not aliveOnly or hero.alive)
-				and (not ignoreSelf or not hero.isMe)
+		if TeamCheck(hero, team)
+				and AliveCondition(aliveOnly, hero.alive)
+				and IgnoreCondition(ignoreSelf, hero.isMe)
 				then
 			table.insert(heroes, hero)
 		end
     end
 	
     return L_Core:OrderHeroes(orderMode, heroes)
+end
+
+function TeamCheck(hero, team)
+	local enemyCheck = team == L_Core.Team.Enemy and hero.isEnemy
+	local allyCheck = team == L_Core.Team.Ally and hero.isAlly
+	return team == L_Core.Team.Any or enemyCheck or allyCheck
+end
+
+function AliveCondition(aliveOnly, alive)
+	return not aliveOnly or alive
+end
+
+function IgnoreCondition(ignoreSelf, isMe)
+	return not ignoreSelf or not isMe
 end
 
 function L_Core:GetHeroesInRange(range, team, aliveOnly, orderMode, ignoreSelf)

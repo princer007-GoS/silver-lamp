@@ -2,7 +2,7 @@ class 'L_Script'
 
 local ScriptInfo = 
 {
-	Version = 0.63,
+	Version = 0.7,
 	Patch = 9.24,
 	Release = "dBeta",
 }
@@ -21,7 +21,6 @@ function LoadMenu()
 
     MM:MenuElement({type = SPACE, name = "[L] Thresh - WIP"})
     MM:MenuElement({type = MENU, id = "Combo", name = "Combo"})
-    --MM.Combo:MenuElement({id = "Mode", name = "Mode", value = 1, drop = {"Hook anyone in range", "Hook by target selector priorities"}})
     MM.Combo:MenuElement({id = "UseQ", name = "Use Q", value = true})
     MM.Combo:MenuElement({id = "QPredChance", name = "Hitchance", value = 2, drop = {"Normal", "High", "Immobile"}})
     MM.Combo:MenuElement({type = SPACE, name = ""})
@@ -39,7 +38,7 @@ function LoadMenu()
 
     MM:MenuElement({type = MENU, id = "Harass", name = "Harass"})
     MM.Harass:MenuElement({id = "UseQ", name = "Use Q", value = true})
-    MM.Harass:MenuElement({id = "QPredChance", name = "Hitchance", value = 2, drop = {"Normal", "High", "Immobile"}})
+    MM.Harass:MenuElement({id = "QMode", name = "Mode", value = 1, drop = {"Hook when possible", "Only target selector priorities"}})
 	
     MM:MenuElement({type = MENU, id = "Drawings", name = "Drawings"})
     MM.Drawings:MenuElement({id = "Q", name = "Draw Q range", value = true})
@@ -48,12 +47,12 @@ function LoadMenu()
 end
 
 function L_Script:Init()
-	QData = {Type = _G.SPELLTYPE_LINE, Delay = 0.5, Radius = 80, Range = 1000, Speed = 1900, Collision = true, MaxCollision = 0, CollisionTypes = {_G.COLLISION_MINION, _G.COLLISION_YASUOWALL}, UseBoundingRadius = true }
 	WData = {Range = 950, Radius = 150}
+	QData = {Type = _G.SPELLTYPE_LINE, Delay = 0.5, Radius = 80, Range = 1000, Speed = 1900, Collision = true, MaxCollision = 0, CollisionTypes = {0, 2, 3}, UseBoundingRadius = true }
 	EData = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 150, Range = 450, Speed = 1100, Collision = false}
 	
 	LoadMenu()
-
+	
 	L_Core:LoadSubmodule('GamsteronPrediction')
 	inited = true
 end
@@ -94,10 +93,31 @@ function Combo()
 end
 
 function Harass()
-	CastQ(GetPredSetting(MM.Harass))
+
+	if IsSecondQ() or not MM.Harass.UseQ:Value() then return end
+	
+	if MM.Harass.QMode:Value() == 1 then
+		CastAnyQ()
+	end
+	
+	if MM.Harass.QMode:Value() == 2 then
+		CastQ(HITCHANCE_HIGH)
+	end
 end
 
 --CAST
+function CastAnyQ()
+	local enemies = L_Core:GetHeroesInRange(QData.Range, L_Core.Team.Enemy, true, L_Core.OrderMode.CurrentHP, true)
+	
+    for _, enemy in pairs(enemies) do
+		local pred = GetGamsteronPrediction(enemy, QData, myHero)
+		if pred.Hitchance >= HITCHANCE_HIGH then
+		print()
+			InitiateQCast(pred.CastPosition)
+			return
+		end
+	end
+end
 
 function CastQ(predChance)
 	if Game.CanUseSpell(_Q) ~= READY then return end
@@ -117,10 +137,14 @@ end
 function FirstQCast(predChance)
 	local pred = GetGamsteronPrediction(QTarget, QData, myHero)
 	if pred.Hitchance >= predChance then
-		_G.SDK.Orbwalker:SetAttack(false)
-		Control.CastSpell(HK_Q, pred.CastPosition)
-        DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
+		InitiateQCast(pred.CastPosition)
 	end
+end
+
+function InitiateQCast(pos)
+		_G.SDK.Orbwalker:SetAttack(false)
+		Control.CastSpell(HK_Q, pos)
+        DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
 end
 
 function SecondQCast()
@@ -167,7 +191,7 @@ end
 
 function CastR()
 	if Game.CanUseSpell(_R) ~= READY then return end
-	if L_Core:CountHeroesInRange(450 - 40, L_Core.Team.Enemy) >= MM.Combo.EnemiesToCastR:Value() then
+	if L_Core:CountHeroesInRange(450 - 40, L_Core.Team.Enemy, true) >= MM.Combo.EnemiesToCastR:Value() then
 		Control.CastSpell(HK_R)
 	end
 end

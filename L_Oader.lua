@@ -70,10 +70,11 @@ function LoadChampionSubmodule()
 	if scriptsLoaded then print("L Submodules are already loaded") return end
 	
 	LoadSubmodule(scriptFile)
-	if CheckUpdates(scriptFile, L_Script:VersionCheck()) 
+	if not CheckUpdates(scriptFile, L_Script:VersionCheck()) 
 	then 
-		L_Script:Init() --if updated not needed, we load the script
+		LoadSubmodule(scriptFile)
 	end
+	L_Script:Init()
 	
 	scriptsLoaded = true
 end
@@ -87,7 +88,7 @@ end
 function CheckUpdates(name, version)
 	if L_Versions[name] == nil or L_Versions[name] <= version then return true end
 	DownloadCommon(name)
-		print(name .. " updated. No reload needed")
+		print(name .. " updated")
 	downloadOccured = true
 end
 

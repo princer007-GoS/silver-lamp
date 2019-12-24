@@ -1,7 +1,7 @@
 L_Versions = 
 {
 	["L_Oader"] = 1.11,
-	["L_Core"] = 0.23,
+	["L_Core"] = 0.24,
 	["L_Thresh"] = 0.74
 }
 

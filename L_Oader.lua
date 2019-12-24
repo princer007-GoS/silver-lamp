@@ -124,7 +124,7 @@ end
 
 function DownloadCommon(name, path)
 		DownloadFile("https://raw.githubusercontent.com/princer007-GoS/silver-lamp/master/Common/".. bundleDir .. name .. ".lua", bundlePath .. name .. ".lua")
-		print(name .. " downloaded")
+		print(name .. " ready")
 end
 
 function CheckForLoaderUpdates()

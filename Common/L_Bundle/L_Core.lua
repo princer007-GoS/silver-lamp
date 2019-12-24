@@ -2,7 +2,7 @@
 
 local ScriptInfo = 
 {
-	Version = 0.23,
+	Version = 0.24,
 	Patch = 9.24,
 	Release = "dAlpha",
 }
@@ -50,9 +50,9 @@ L_Core.PredictionCollisionType =
 L_Core.PredictionMenuHitchance =  
 {
 	0.2,
-	0.4,
-	0.6,
-	0.8,
+	0.3,
+	0.5,
+	0.75,
 	1
 }
 

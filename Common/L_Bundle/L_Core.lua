@@ -2,7 +2,7 @@
 
 local ScriptInfo = 
 {
-	Version = 0.2,
+	Version = 0.23,
 	Patch = 9.24,
 	Release = "dAlpha",
 }
@@ -31,6 +31,29 @@ L_Core.Team = {
 	Any = 0,
 	Ally = 1,
 	Enemy = 2
+}
+
+L_Core.PredictionSpellType = 
+{
+	Linear = "linear",
+	Cone = "conic",
+	Circular = "circular",
+}
+    
+L_Core.PredictionCollisionType =  
+{
+	Minion = "minion",
+	Hero = "hero",
+	Windwall = "windwall",
+}
+    
+L_Core.PredictionMenuHitchance =  
+{
+	0.2,
+	0.4,
+	0.6,
+	0.8,
+	1
 }
 
 local OrderModeSortPicker =

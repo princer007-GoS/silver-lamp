@@ -2,7 +2,7 @@ class 'L_Script'
 
 local ScriptInfo = 
 {
-	Version = 0.71,
+	Version = 0.72,
 	Patch = 9.24,
 	Release = "dBeta",
 }
@@ -22,7 +22,7 @@ function LoadMenu()
     MM:MenuElement({type = SPACE, name = "[L] Thresh - WIP"})
     MM:MenuElement({type = MENU, id = "Combo", name = "Combo"})
     MM.Combo:MenuElement({id = "UseQ", name = "Use Q", value = true})
-    MM.Combo:MenuElement({id = "QPredChance", name = "Hitchance", value = 2, drop = {"Normal", "High", "Immobile"}})
+    MM.Combo:MenuElement({id = "QPredChance", name = "Hitchance", value = 2, drop = {"Normal", "High", "Very high", "Try to dodge", "Immobile"}})
     MM.Combo:MenuElement({type = SPACE, name = ""})
     MM.Combo:MenuElement({id = "UseW", name = "Use W", value = true})
     MM.Combo:MenuElement({id = "UseWAfter", name = "Cast W after second Q", value = true})
@@ -48,12 +48,14 @@ end
 
 function L_Script:Init()
 	WData = {Range = 950, Radius = 150}
-	QData = {Type = _G.SPELLTYPE_LINE, Delay = 0.5, Radius = 80, Range = 1000, Speed = 1900, Collision = true, MaxCollision = 0, CollisionTypes = {0, 2, 3}, UseBoundingRadius = true }
-	EData = {Type = _G.SPELLTYPE_LINE, Delay = 0.25, Radius = 150, Range = 450, Speed = 1100, Collision = false}
+	
+	QData = {type = L_Core.PredictionSpellType.Linear, delay = 0.5, radius = 75, range = 1000, speed = 1900, collision = {L_Core.PredictionCollisionType.Minion, L_Core.PredictionCollisionType.Windwall, L_Core.PredictionCollisionType.Hero}}
+	EData = {type = L_Core.PredictionSpellType.Linear, delay = 0.25, radius = 150, range = 450, speed = 1100, collision = {}}
 	
 	LoadMenu()
 	
-	L_Core:LoadSubmodule('GamsteronPrediction')
+	L_Core:LoadSubmodule("PremiumPrediction")
+	
 	inited = true
 end
 
@@ -66,7 +68,7 @@ end
 function OnTick()
     if myHero.dead or not inited then return end
 	
-    QTarget = _G.SDK.TargetSelector:GetTarget(QData.Range)
+    QTarget = _G.SDK.TargetSelector:GetTarget(QData.range)
 	
 	if _G.SDK.Orbwalker.Modes[_G.SDK.ORBWALKER_MODE_COMBO] then
 		Combo()
@@ -79,7 +81,7 @@ end
 
 function OnDraw()
     if myHero.dead or not inited then return end
-	if MM.Drawings.Q:Value() then Draw.Circle(myHero.pos, QData.Range, 0, L_Core.Colors["White"]) end
+	if MM.Drawings.Q:Value() then Draw.Circle(myHero.pos, QData.range, 0, L_Core.Colors["White"]) end
 	if MM.Drawings.QTarget:Value() and QTarget then Draw.Circle(QTarget.pos, 100, 0, L_Core.Colors['Cyan']) end
 end
 
@@ -100,30 +102,30 @@ function Harass()
 	end
 	
 	if MM.Harass.QMode:Value() == 2 then
-		CastQ(HITCHANCE_HIGH)
+		CastQ()
 	end
 end
 
 --CAST
 function CastAnyQ()
 	if Game.CanUseSpell(_Q) ~= READY then return end
-	local enemies = L_Core:GetHeroesInRange(QData.Range, L_Core.Team.Enemy, true, L_Core.OrderMode.CurrentHP, true)
+	local enemies = L_Core:GetHeroesInRange(QData.range, L_Core.Team.Enemy, true, L_Core.OrderMode.CurrentHP, true)
 	
     for _, enemy in pairs(enemies) do
-		local pred = GetGamsteronPrediction(enemy, QData, myHero)
-		if pred.Hitchance >= HITCHANCE_HIGH then
-			InitiateQCast(pred.CastPosition)
+		local predprem = _G.PremiumPrediction:GetPrediction(myHero, enemy, QData)
+		if predprem.HitChance >= L_Core.PredictionMenuHitchance[3]then
+			InitiateQCast(predprem.CastPosition)
 			return
 		end
 	end
 end
 
-function CastQ(predChance)
+function CastQ()
 	if Game.CanUseSpell(_Q) ~= READY then return end
 	local isSecondQActive = IsSecondQ()
 	
 	if not isSecondQActive then
-		FirstQCast(predChance)
+		FirstQCast()
 	end 
 	
 	if isSecondQActive and 
@@ -133,17 +135,18 @@ function CastQ(predChance)
 	end
 end
 
-function FirstQCast(predChance)
-	local pred = GetGamsteronPrediction(QTarget, QData, myHero)
-	if pred.Hitchance >= predChance then
-		InitiateQCast(pred.CastPosition)
+function FirstQCast()
+	if QTarget == nil then return end
+	local predprem = _G.PremiumPrediction:GetPrediction(myHero, QTarget, QData)
+	if predprem.HitChance >= L_Core.PredictionMenuHitchance[MM.Combo.QPredChance:Value()] then
+		InitiateQCast(predprem.PredPos)
 	end
 end
 
 function InitiateQCast(pos)
 		_G.SDK.Orbwalker:SetAttack(false)
 		Control.CastSpell(HK_Q, pos)
-        DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2.5)
+        DelayAction(function() _G.SDK.Orbwalker:SetAttack(true) end, 2)
 end
 
 function SecondQCast()
@@ -179,7 +182,7 @@ end
 
 function CastE()
 	if Game.CanUseSpell(_E) ~= READY then return end
-    local target = _G.SDK.TargetSelector:GetTarget(EData.Range)
+    local target = _G.SDK.TargetSelector:GetTarget(EData.range)
 	if target == nil then return end
 	
 	local castDistance = -450

@@ -1,14 +1,17 @@
 local ScriptInfo = 
 {
-	Version = 1.03,
+	Version = 1.1,
 	Patch = 9.24,
 	Release = "Stable",
 }
 
-local _Versions = 'L_Versions'
-local _Core = 'L_Core'
-local _Oader = 'L_Oader'
-local _Prediction = 'GamsteronPrediction'
+local L_Dependencies =
+{
+	Versions = 'L_Versions',
+	Core = 'L_Core',
+	Oader = 'L_Oader',
+	Prediction = 'PremiumPrediction'
+}
 
 local bundleDir = "L_Bundle\\"
 local bundlePath = COMMON_PATH .. bundleDir
@@ -23,24 +26,23 @@ function OnLoad()
 	end
 
 	--Loading versions
-	DownloadCommon(_Versions)
-	LoadSubmodule(_Versions)
+	--DownloadCommon(L_Dependencies.Versions)
+	LoadSubmodule(L_Dependencies.Versions)
 	
 	scriptFile = L_SupportedChamps[myHero.charName]
-	
 	if (scriptFile == nil) then return end
 
 	--Checking Loader updates
 	if CheckForLoaderUpdates() then return end
 	
 	--Downloading dependencies
-	CheckAndDownloadDependency(_Core)
-	CheckAndDownloadDependency(_Prediction)
+	CheckAndDownloadDependency(L_Dependencies.Core)
 	CheckAndDownloadDependency(scriptFile)
+	CheckAndDownloadDependency(L_Dependencies.Prediction, true)
 	
-	LoadSubmodule(_Core)
+	LoadSubmodule(L_Dependencies.Core)
 	
-	CheckUpdates(_Core, L_Core:VersionCheck())
+	CheckUpdates(L_Dependencies.Core, L_Core:VersionCheck())
 	
 	function L_Core:LoadSubmodule(name) LoadSubmodule(name) end
 	
@@ -91,10 +93,8 @@ function LoadChampionSubmodule()
 	if scriptsLoaded then print("L Submodules are already loaded") return end
 	
 	LoadSubmodule(scriptFile)
-	if not CheckUpdates(scriptFile, L_Script:VersionCheck()) 
-	then 
-		LoadSubmodule(scriptFile)
-	end
+	if not CheckUpdates(scriptFile, L_Script:VersionCheck()) then return end
+	
 	L_Script:Init()
 	
 	scriptsLoaded = true
@@ -109,29 +109,32 @@ end
 function CheckUpdates(name, version)
 	if L_Versions[name] == nil or L_Versions[name] <= version then return true end
 	DownloadCommon(name)
-		print(name .. " updated")
 	downloadOccured = true
 end
 
-function CheckAndDownloadDependency(name)
+function CheckAndDownloadDependency(name, isThirdParty)
 	local file = bundlePath .. name .. ".lua"
-	if not FileExist(file) then
+	if FileExist(file) then return end
+	if isThirdParty then 
+		DownloadFile(L_ThirdParty[name], file)
+	else
 		DownloadCommon(name, file)
-		print(name .. " installed")
 	end
 end
 
 function DownloadCommon(name, path)
-		if path == nil then path = bundlePath .. name .. ".lua" end
-		DownloadFileAsync("https://raw.githubusercontent.com/princer007-GoS/silver-lamp/master/Common/".. bundleDir .. name .. ".lua", path, function() end)
-		while not FileExist(path) do  end
+		DownloadFile("https://raw.githubusercontent.com/princer007-GoS/silver-lamp/master/Common/".. bundleDir .. name .. ".lua", bundlePath .. name .. ".lua")
+		print(name .. " downloaded")
 end
 
 function CheckForLoaderUpdates()
-		if L_Versions[_Oader] <= ScriptInfo.Version then return false end
-		
-		DownloadFileAsync("https://raw.githubusercontent.com/princer007-GoS/silver-lamp/master/" .. _Oader .. ".lua", _Oader .. ".lua", function() downloadOccured = true end)
-		while not FileExist(path) do end
-		
+		if L_Versions[L_Dependencies.Oader] <= ScriptInfo.Version then return false end
+		DownloadFile("https://raw.githubusercontent.com/princer007-GoS/silver-lamp/master/" .. L_Dependencies.Oader .. ".lua", L_Dependencies.Oader .. ".lua", function() downloadOccured = true end)
 		return true
+end
+
+function DownloadFile(url, path, func)
+	if func == nil then func = function() end end
+		DownloadFileAsync(url, path, func)
+		while not FileExist(path) do  end
 end

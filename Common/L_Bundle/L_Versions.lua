@@ -1,11 +1,17 @@
 L_Versions = 
 {
 	["L_Oader"] = 1.03,
-	["L_Core"] = 0.2,
-	["L_Thresh"] = 0.7
+	["L_Core"] = 0.23,
+	["L_Thresh"] = 0.72
 }
 
 L_SupportedChamps = 
 {
 	["Thresh"] = "L_Thresh"
+}
+
+L_ThirdParty = 
+{
+	["PremiumPrediction"] = "https://raw.githubusercontent.com/princer007-GoS/GoS-Scripts/master/PremiumPrediction.lua", --Untill ark accepts PR
+	["GamsteronOrbwalker"] = "https://raw.githubusercontent.com/gamsteron/GOS-EXT/master/GamsteronOrbwalker.lua"
 }

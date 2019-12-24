@@ -1,6 +1,6 @@
 local ScriptInfo = 
 {
-	Version = 1.1,
+	Version = 1.11,
 	Patch = 9.24,
 	Release = "Stable",
 }
@@ -26,7 +26,7 @@ function OnLoad()
 	end
 
 	--Loading versions
-	--DownloadCommon(L_Dependencies.Versions)
+	DownloadCommon(L_Dependencies.Versions)
 	LoadSubmodule(L_Dependencies.Versions)
 	
 	scriptFile = L_SupportedChamps[myHero.charName]

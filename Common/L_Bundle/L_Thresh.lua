@@ -2,7 +2,7 @@ class 'L_Script'
 
 local ScriptInfo = 
 {
-	Version = 0.72,
+	Version = 0.74,
 	Patch = 9.24,
 	Release = "dBeta",
 }
@@ -39,6 +39,7 @@ function LoadMenu()
     MM:MenuElement({type = MENU, id = "Harass", name = "Harass"})
     MM.Harass:MenuElement({id = "UseQ", name = "Use Q", value = true})
     MM.Harass:MenuElement({id = "QMode", name = "Mode", value = 1, drop = {"Hook when possible", "Only target selector priorities"}})
+    MM.Harass:MenuElement({id = "QPredChance", name = "\"Hook when possible\" hitchance", value = 2, drop = {"Normal", "High", "Very high", "Try to dodge", "Immobile"}})
 	
     MM:MenuElement({type = MENU, id = "Drawings", name = "Drawings"})
     MM.Drawings:MenuElement({id = "Q", name = "Draw Q range", value = true})
@@ -91,7 +92,7 @@ function Combo()
 	if(MM.Combo.UseR:Value()) then CastR() end
 	if(MM.Combo.UseW:Value()) then CastW() end
 	if(MM.Combo.UseE:Value()) then CastE() end
-	if(MM.Combo.UseQ:Value()) then CastQ(GetPredSetting(MM.Combo)) end
+	if(MM.Combo.UseQ:Value()) then CastQ() end
 end
 
 function Harass()
@@ -113,9 +114,8 @@ function CastAnyQ()
 	
     for _, enemy in pairs(enemies) do
 		local predprem = _G.PremiumPrediction:GetPrediction(myHero, enemy, QData)
-		if predprem.HitChance >= L_Core.PredictionMenuHitchance[3]then
-			InitiateQCast(predprem.CastPosition)
-			return
+		if predprem.HitChance >= L_Core.PredictionMenuHitchance[MM.Harass.QPredChance:Value()] then
+			InitiateQCast(predprem.PredPos)
 		end
 	end
 end
@@ -199,10 +199,6 @@ function CastR()
 end
 
 --Misc
-
-function GetPredSetting(menu)
-	return menu.QPredChance:Value()+1
-end
 
 function IsSecondQ()
 	return myHero:GetSpellData(_Q).name == "ThreshQLeap"

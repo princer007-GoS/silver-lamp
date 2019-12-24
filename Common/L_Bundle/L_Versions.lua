@@ -2,7 +2,7 @@ L_Versions =
 {
 	["L_Oader"] = 1.11,
 	["L_Core"] = 0.23,
-	["L_Thresh"] = 0.72
+	["L_Thresh"] = 0.74
 }
 
 L_SupportedChamps = 
